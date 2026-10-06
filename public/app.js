@@ -1,6 +1,6 @@
-// app.js - Lógica interativa do frontend com explicações simples
+// app.js - Lógica simples e funcional de interface
 
-// Elementos da interface
+// Elementos
 const formEncurtar = document.getElementById('form-encurtar');
 const inputUrl = document.getElementById('input-url');
 const resultadoEncurtada = document.getElementById('resultado-encurtada');
@@ -10,8 +10,8 @@ const infoOriginal = document.getElementById('info-original');
 const infoData = document.getElementById('info-data');
 const badgeId = document.getElementById('badge-id');
 
-const tabBtns = document.querySelectorAll('.tab-btn');
-const tabContents = document.querySelectorAll('.tab-content');
+const tabItems = document.querySelectorAll('.tab-item');
+const tabPanes = document.querySelectorAll('.tab-pane');
 
 const formBuscaId = document.getElementById('form-busca-id');
 const inputBuscaId = document.getElementById('input-busca-id');
@@ -27,196 +27,195 @@ const resultadoBuscaCodigo = document.getElementById('resultado-busca-codigo');
 
 const tabelaCorpo = document.getElementById('tabela-corpo');
 const btnAtualizarLista = document.getElementById('btn-atualizar-lista');
+const toast = document.getElementById('toast');
 
-// Define a data atual por padrão no campo de busca por data
+// Mostra o toast breve
+function mostrarToast(texto = 'Copiado!') {
+  if (!toast) return;
+  toast.textContent = texto;
+  toast.classList.remove('hidden');
+  setTimeout(() => toast.classList.add('hidden'), 2000);
+}
+
+// Data atual no filtro
 const hoje = new Date().toISOString().split('T')[0];
 if (inputBuscaData) {
   inputBuscaData.value = hoje;
 }
 
-// ---------------------------------------------------------------------
-// 1. AÇÃO: Encurtar URL (Consome o método 1 via POST /api/encurtar)
-// ---------------------------------------------------------------------
+// 1. Encurtar URL (Método 1)
 formEncurtar.addEventListener('submit', async (e) => {
   e.preventDefault();
   const url = inputUrl.value.trim();
+  if (!url) return;
 
   try {
-    const resposta = await fetch('/api/encurtar', {
+    const res = await fetch('/api/encurtar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ url })
     });
+    const dados = await res.json();
 
-    const dados = await resposta.json();
-
-    if (!resposta.ok) {
-      alert(dados.erro || 'Falha ao encurtar URL.');
+    if (!res.ok) {
+      alert(dados.erro || 'Erro ao encurtar');
       return;
     }
 
-    // Exibe o link encurtado na tela
     linkCurto.href = dados.url_encurtada;
     linkCurto.textContent = dados.url_encurtada;
     infoOriginal.textContent = dados.url_original;
     infoData.textContent = dados.data_criacao;
-    badgeId.textContent = `ID: #${dados.id}`;
+    badgeId.textContent = `ID #${dados.id}`;
 
     resultadoEncurtada.classList.remove('hidden');
     inputUrl.value = '';
 
-    // Atualiza a tabela de links automaticamente
-    carregarTodasUrls();
-  } catch (erro) {
-    console.error('Erro:', erro);
-    alert('Erro de conexão com o servidor.');
+    carregarUrls();
+  } catch (err) {
+    alert('Erro de conexão ao encurtar URL.');
   }
 });
 
-// Botão para copiar o link encurtado para a área de transferência
-btnCopiar.addEventListener('click', () => {
-  navigator.clipboard.writeText(linkCurto.textContent).then(() => {
-    const textoOriginal = btnCopiar.textContent;
-    btnCopiar.textContent = 'Copiado!';
-    setTimeout(() => {
-      btnCopiar.textContent = textoOriginal;
-    }, 2000);
+// Copiar link encurtado
+btnCopiar.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(linkCurto.textContent);
+    mostrarToast('Link copiado!');
+  } catch (err) {
+    console.error(err);
+  }
+});
+
+// Navegação entre abas de consulta
+tabItems.forEach(tab => {
+  tab.addEventListener('click', () => {
+    tabItems.forEach(t => t.classList.remove('active'));
+    tabPanes.forEach(p => p.classList.remove('active'));
+
+    tab.classList.add('active');
+    const painel = document.getElementById(tab.dataset.tab);
+    if (painel) painel.classList.add('active');
   });
 });
 
-// ---------------------------------------------------------------------
-// CONTROLE DE ABAS (Navegação entre Métodos 2, 3 e 4)
-// ---------------------------------------------------------------------
-tabBtns.forEach(btn => {
-  btn.addEventListener('click', () => {
-    tabBtns.forEach(b => b.classList.remove('active'));
-    tabContents.forEach(c => c.classList.remove('active'));
-
-    btn.classList.add('active');
-    const tabAlvo = document.getElementById(btn.dataset.tab);
-    if (tabAlvo) {
-      tabAlvo.classList.add('active');
-    }
-  });
-});
-
-// ---------------------------------------------------------------------
-// 2. AÇÃO: Buscar por ID (Consome o método 2 via GET /api/urls/:id)
-// ---------------------------------------------------------------------
+// 2. Consulta por ID (Método 2)
 formBuscaId.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const id = inputBuscaId.value;
+  const id = inputBuscaId.value.trim();
+  if (!id) return;
 
   try {
-    const resposta = await fetch(`/api/urls/${id}`);
-    const dados = await resposta.json();
+    const res = await fetch(`/api/urls/${id}`);
+    const dados = await res.json();
 
     resultadoBuscaId.classList.remove('hidden');
 
-    if (!resposta.ok) {
-      resultadoBuscaId.className = 'consulta-resultado erro';
-      resultadoBuscaId.innerHTML = `<strong>Erro:</strong> ${dados.erro}`;
+    if (!res.ok) {
+      resultadoBuscaId.className = 'box-resultado erro';
+      resultadoBuscaId.textContent = dados.erro || 'URL não encontrada.';
       return;
     }
 
-    resultadoBuscaId.className = 'consulta-resultado sucesso';
+    resultadoBuscaId.className = 'box-resultado';
     resultadoBuscaId.innerHTML = `
       <p><strong>ID:</strong> #${dados.id}</p>
-      <p><strong>URL Encurtada:</strong> <a href="${dados.url_encurtada}" target="_blank" style="color: #38bdf8;">${dados.url_encurtada}</a></p>
-      <p><strong>Destino Original:</strong> ${dados.url_original}</p>
-      <p><strong>Data de Criação:</strong> ${dados.data_criacao}</p>
-      <p><strong>Total de Cliques:</strong> ${dados.cliques}</p>
+      <p><strong>Encurtamento:</strong> <a href="${dados.url_encurtada}" target="_blank">${dados.url_encurtada}</a></p>
+      <p><strong>Destino:</strong> ${dados.url_original}</p>
+      <p><strong>Data:</strong> ${dados.data_criacao} • <strong>Cliques:</strong> ${dados.cliques}</p>
     `;
-  } catch (erro) {
-    console.error(erro);
-    resultadoBuscaId.className = 'consulta-resultado erro';
-    resultadoBuscaId.textContent = 'Erro ao realizar busca.';
+  } catch (err) {
+    resultadoBuscaId.className = 'box-resultado erro';
+    resultadoBuscaId.textContent = 'Erro ao consultar ID.';
   }
 });
 
-// ---------------------------------------------------------------------
-// 3. AÇÃO: Buscar por Data (Consome o método 3 via GET /api/urls/data/:data)
-// ---------------------------------------------------------------------
+// 3. Consulta por Data (Método 3)
 formBuscaData.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const data = inputBuscaData.value;
+  const data = inputBuscaData.value.trim();
+  if (!data) return;
 
   try {
-    const resposta = await fetch(`/api/urls/data/${data}`);
-    const lista = await resposta.json();
+    const res = await fetch(`/api/urls/data/${data}`);
+    const lista = await res.json();
 
     resultadoBuscaData.classList.remove('hidden');
-    resultadoBuscaData.className = 'consulta-resultado sucesso';
+    resultadoBuscaData.className = 'box-resultado';
 
     if (!lista || lista.length === 0) {
-      resultadoBuscaData.innerHTML = `<p>Nenhuma URL foi cadastrada na data <strong>${data}</strong>.</p>`;
+      resultadoBuscaData.innerHTML = `<p>Nenhuma URL cadastrada na data <strong>${data}</strong>.</p>`;
       return;
     }
 
-    let html = `<p><strong>${lista.length}</strong> URL(s) encontrada(s) na data <strong>${data}</strong>:</p><ul style="margin-top: 8px; padding-left: 20px;">`;
-    lista.forEach(item => {
-      html += `
-        <li style="margin-bottom: 6px;">
-          <a href="${item.url_encurtada}" target="_blank" style="color: #38bdf8; font-weight: bold;">${item.url_encurtada}</a>
-          → ${item.url_original} (ID: #${item.id}, Cliques: ${item.cliques})
-        </li>
-      `;
-    });
-    html += '</ul>';
-    resultadoBuscaData.innerHTML = html;
-  } catch (erro) {
-    console.error(erro);
-    resultadoBuscaData.className = 'consulta-resultado erro';
-    resultadoBuscaData.textContent = 'Erro ao buscar URLs por data.';
+    let itens = lista.map(item => `
+      <li style="margin-bottom: 4px;">
+        <a href="${item.url_encurtada}" target="_blank">${item.url_encurtada}</a>
+        — ${item.url_original} (ID: #${item.id}, ${item.cliques} cliques)
+      </li>
+    `).join('');
+
+    resultadoBuscaData.innerHTML = `
+      <p style="margin-bottom: 8px;"><strong>${lista.length}</strong> URL(s) encontrada(s):</p>
+      <ul style="padding-left: 20px;">${itens}</ul>
+    `;
+  } catch (err) {
+    resultadoBuscaData.className = 'box-resultado erro';
+    resultadoBuscaData.textContent = 'Erro ao buscar por data.';
   }
 });
 
-// ---------------------------------------------------------------------
-// 4. AÇÃO: Buscar por Código (Consome o método 4 via GET /api/urls/codigo/:codigo)
-// ---------------------------------------------------------------------
+// 4. Consulta por Código ou Encurtamento (Método 4)
 formBuscaCodigo.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const termo = encodeURIComponent(inputBuscaCodigo.value.trim());
+  const termoBruto = inputBuscaCodigo.value.trim().replace(/\/$/, '');
+  if (!termoBruto) return;
+
+  // Extrai o código mesmo se o usuário colou a URL completa (ex: http://localhost:3000/732587)
+  const partes = termoBruto.split('/');
+  const codigo = partes[partes.length - 1];
 
   try {
-    const resposta = await fetch(`/api/urls/codigo/${termo}`);
-    const dados = await resposta.json();
+    // Tenta primeiro a rota por código
+    let res = await fetch(`/api/urls/codigo/${encodeURIComponent(codigo)}`);
+    
+    // Se não encontrou pela rota por código, tenta por termo de busca
+    if (!res.ok) {
+      res = await fetch(`/api/buscar-codigo?termo=${encodeURIComponent(termoBruto)}`);
+    }
 
+    const dados = await res.json();
     resultadoBuscaCodigo.classList.remove('hidden');
 
-    if (!resposta.ok) {
-      resultadoBuscaCodigo.className = 'consulta-resultado erro';
-      resultadoBuscaCodigo.innerHTML = `<strong>Erro:</strong> ${dados.erro}`;
+    if (!res.ok) {
+      resultadoBuscaCodigo.className = 'box-resultado erro';
+      resultadoBuscaCodigo.textContent = dados.erro || 'Encurtamento não encontrado.';
       return;
     }
 
-    resultadoBuscaCodigo.className = 'consulta-resultado sucesso';
+    resultadoBuscaCodigo.className = 'box-resultado';
     resultadoBuscaCodigo.innerHTML = `
-      <p><strong>Código Localizado:</strong> <code>${dados.codigo}</code> (ID: #${dados.id})</p>
-      <p><strong>URL Encurtada:</strong> <a href="${dados.url_encurtada}" target="_blank" style="color: #38bdf8;">${dados.url_encurtada}</a></p>
-      <p><strong>Destino Original:</strong> ${dados.url_original}</p>
-      <p><strong>Data de Cadastro:</strong> ${dados.data_criacao}</p>
-      <p><strong>Total de Cliques:</strong> ${dados.cliques}</p>
+      <p><strong>Código:</strong> <code>${dados.codigo}</code> (ID: #${dados.id})</p>
+      <p><strong>Encurtamento:</strong> <a href="${dados.url_encurtada}" target="_blank">${dados.url_encurtada}</a></p>
+      <p><strong>Destino:</strong> ${dados.url_original}</p>
+      <p><strong>Data:</strong> ${dados.data_criacao} • <strong>Cliques:</strong> ${dados.cliques}</p>
     `;
-  } catch (erro) {
-    console.error(erro);
-    resultadoBuscaCodigo.className = 'consulta-resultado erro';
-    resultadoBuscaCodigo.textContent = 'Erro ao buscar URL encurtada.';
+  } catch (err) {
+    resultadoBuscaCodigo.className = 'box-resultado erro';
+    resultadoBuscaCodigo.textContent = 'Encurtamento não encontrado.';
   }
 });
 
-// ---------------------------------------------------------------------
-// LISTAGEM GERAL: Carregar e renderizar tabela de URLs salvas
-// ---------------------------------------------------------------------
-async function carregarTodasUrls() {
+// Tabela de URLs
+async function carregarUrls() {
   try {
-    const resposta = await fetch('/api/urls');
-    const lista = await resposta.json();
+    const res = await fetch('/api/urls');
+    const lista = await res.json();
 
     if (!lista || lista.length === 0) {
       tabelaCorpo.innerHTML = `
         <tr>
-          <td colspan="6" class="texto-centro">Nenhuma URL cadastrada ainda. Crie sua primeira URL acima!</td>
+          <td colspan="6" class="texto-vazio">Nenhuma URL cadastrada ainda.</td>
         </tr>
       `;
       return;
@@ -226,33 +225,26 @@ async function carregarTodasUrls() {
       <tr>
         <td>#${item.id}</td>
         <td>
-          <a href="${item.url_encurtada}" target="_blank" style="color: #38bdf8; font-weight: 600;">
+          <a href="${item.url_encurtada}" target="_blank" class="url-curta-link">
             ${item.codigo}
           </a>
         </td>
         <td>
-          <span class="url-longa-truncada" title="${item.url_original}">
-            ${item.url_original}
-          </span>
+          <span class="url-texto" title="${item.url_original}">${item.url_original}</span>
         </td>
         <td>${item.data_criacao}</td>
+        <td>${item.cliques}</td>
         <td>
-          <span class="badge-cliques">${item.cliques} cliques</span>
-        </td>
-        <td>
-          <a href="${item.url_encurtada}" target="_blank" class="btn btn-small">
-            Acessar ↗
+          <a href="${item.url_encurtada}" target="_blank" class="btn btn-secundario" style="padding: 3px 8px; font-size: 0.8rem;">
+            Acessar
           </a>
         </td>
       </tr>
     `).join('');
-  } catch (erro) {
-    console.error('Erro ao carregar lista de URLs:', erro);
+  } catch (err) {
+    console.error('Erro ao carregar URLs:', err);
   }
 }
 
-// Botão de atualizar lista manualmente
-btnAtualizarLista.addEventListener('click', carregarTodasUrls);
-
-// Carrega as URLs ao abrir a página
-carregarTodasUrls();
+btnAtualizarLista.addEventListener('click', carregarUrls);
+carregarUrls();
