@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Encurtador de URL - Projeto Prático</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="background-glow"></div>
+
+  <div class="container">
+    <!-- Cabeçalho -->
+    <header class="header">
+      <div class="badge">Projeto Prático • Desenvolvimento Web</div>
+      <h1>Encurtador de URLs</h1>
+      <p class="subtitle">
+        Transforme URLs longas em links curtos e práticos. Persistência em banco de dados SQLite e consultas avançadas.
+      </p>
+    </header>
+
+    <!-- Card Principal: Encurtar URL -->
+    <section class="card hero-card">
+      <h2>1. Encurtar uma Nova URL</h2>
+      <p class="card-desc">Insira a URL longa abaixo para gerar um código curto e salvar no banco de dados.</p>
+      
+      <form id="form-encurtar" class="form-row">
+        <div class="input-wrapper">
+          <input 
+            type="url" 
+            id="input-url" 
+            placeholder="Cole sua URL longa aqui (ex: https://github.com/usuario/projeto)" 
+            required
+          >
+        </div>
+        <button type="submit" id="btn-encurtar" class="btn btn-primary">
+          Encurtar URL
+        </button>
+      </form>
+
+      <!-- Resultado da URL Encurtada -->
+      <div id="resultado-encurtada" class="resultado-box hidden">
+        <div class="resultado-header">
+          <span class="tag-sucesso"> URL Encurtada com Sucesso!</span>
+          <span id="badge-id" class="badge-tag">ID: #1</span>
+        </div>
+        <div class="link-output-row">
+          <a id="link-curto" href="#" target="_blank" rel="noopener noreferrer" class="link-curto"></a>
+          <button id="btn-copiar" class="btn btn-secondary">Copiar</button>
+        </div>
+        <div class="meta-info">
+          <span><strong>Destino:</strong> <span id="info-original"></span></span>
+          <span><strong>Data de Criação:</strong> <span id="info-data"></span></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Seção de Consultas (Atendendo aos requisitos 2, 3 e 4) -->
+    <section class="card">
+      <div class="tabs-header">
+        <h2>Consultas e Métodos do Sistema</h2>
+        <div class="tabs-nav">
+          <button class="tab-btn active" data-tab="tab-id">Por ID</button>
+          <button class="tab-btn" data-tab="tab-data">Por Data</button>
+          <button class="tab-btn" data-tab="tab-codigo">Por Encurtamento</button>
+        </div>
+      </div>
+
+      <!-- Aba 1: Buscar por ID -->
+      <div id="tab-id" class="tab-content active">
+        <p class="tab-desc"><strong>Método 2:</strong> Retorna uma URL encurtada conforme seu ID no banco de dados.</p>
+        <form id="form-busca-id" class="form-inline">
+          <input type="number" id="input-busca-id" placeholder="Ex: 1" min="1" required>
+          <button type="submit" class="btn btn-outline">Buscar por ID</button>
+        </form>
+        <div id="resultado-busca-id" class="consulta-resultado hidden"></div>
+      </div>
+
+      <!-- Aba 2: Buscar por Data -->
+      <div id="tab-data" class="tab-content">
+        <p class="tab-desc"><strong>Método 3:</strong> Retorna todas as URLs encurtadas em uma data específica.</p>
+        <form id="form-busca-data" class="form-inline">
+          <input type="date" id="input-busca-data" required>
+          <button type="submit" class="btn btn-outline">Filtrar por Data</button>
+        </form>
+        <div id="resultado-busca-data" class="consulta-resultado hidden"></div>
+      </div>
+
+      <!-- Aba 3: Buscar por Encurtamento -->
+      <div id="tab-codigo" class="tab-content">
+        <p class="tab-desc"><strong>Método 4:</strong> Retorna a URL encurtada informando o código ou o link encurtado.</p>
+        <form id="form-busca-codigo" class="form-inline">
+          <input type="text" id="input-busca-codigo" placeholder="Ex: f7fe82 ou http://localhost:3000/f7fe82" required>
+          <button type="submit" class="btn btn-outline">Buscar por Código</button>
+        </form>
+        <div id="resultado-busca-codigo" class="consulta-resultado hidden"></div>
+      </div>
+    </section>
+
+    <!-- Tabela com Todas as URLs Cadastradas -->
+    <section class="card">
+      <div class="table-header-row">
+        <div>
+          <h2>URLs Cadastradas no Banco</h2>
+          <p class="card-desc">Histórico de todas as URLs encurtadas salvas no SQLite.</p>
+        </div>
+        <button id="btn-atualizar-lista" class="btn btn-small">↻ Atualizar</button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="tabela-urls">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Link Encurtado</th>
+              <th>URL Original</th>
+              <th>Data</th>
+              <th>Cliques</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="tabela-corpo">
+            <tr>
+              <td colspan="6" class="texto-centro">Carregando links...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer class="footer">
+      <p>Projeto de Encurtador de URLs • SQLite + Node.js + Express</p>
+      <p class="git-hint">Pronto para entrega e envio ao repositório GitHub.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
