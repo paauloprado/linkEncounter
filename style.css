@@ -1,4 +1,4 @@
-/* style.css - Design minimalista, limpo e direto com fundo branco */
+/* style.css - Design minimalista com fundo branco */
 
 * {
   box-sizing: border-box;
@@ -30,7 +30,7 @@ body {
   color: #111827;
 }
 
-/* Área de Encurtar URL */
+/* Encurtar */
 .section-encurtar {
   margin-bottom: 32px;
 }
@@ -114,7 +114,7 @@ input::placeholder {
   color: #1d4ed8;
 }
 
-/* Caixa de Sucesso */
+/* Sucesso */
 .box-sucesso {
   margin-top: 12px;
   padding: 12px 14px;
@@ -149,7 +149,7 @@ input::placeholder {
   word-break: break-all;
 }
 
-/* Seções e Blocos */
+/* Seções */
 .section-bloco {
   margin-top: 36px;
   border-top: 1px solid #f3f4f6;
@@ -211,7 +211,7 @@ input::placeholder {
   display: block;
 }
 
-/* Caixa de Resultado de Consultas */
+/* Resultados das consultas */
 .box-resultado {
   margin-top: 10px;
   padding: 12px 14px;

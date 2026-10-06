@@ -7,7 +7,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ROTA 1: Encurtar URL (POST /api/encurtar)
@@ -78,7 +78,7 @@ app.get('/api/urls', (req, res) => {
 app.get('/:codigo', (req, res, next) => {
   const { codigo } = req.params;
 
-  if (codigo === 'favicon.ico' || codigo === 'api') {
+  if (codigo.includes('.') || codigo === 'favicon.ico' || codigo === 'api') {
     return next();
   }
 

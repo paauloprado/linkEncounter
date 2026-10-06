@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Encurtador de URL</title>
+  <title>linkEncounter - Encurtador de URL</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="app-container">
-    <!-- Cabeçalho direto e sem enrolação -->
+    <!-- Cabeçalho simples -->
     <header class="app-header">
       <h1>Encurtador de URL</h1>
     </header>
 
-    <!-- Área principal de encurtamento direta (sem card) -->
+    <!-- Área de encurtamento -->
     <section class="section-encurtar">
       <form id="form-encurtar" class="form-row">
         <input 
@@ -25,7 +25,7 @@
         <button type="submit" id="btn-encurtar" class="btn btn-primary">Encurtar</button>
       </form>
 
-      <!-- Feedback simples quando a URL é encurtada -->
+      <!-- Feedback de sucesso -->
       <div id="resultado-encurtada" class="box-sucesso hidden">
         <div class="resultado-linha">
           <a id="link-curto" href="#" target="_blank" rel="noopener noreferrer"></a>
@@ -75,7 +75,7 @@
       </div>
     </section>
 
-    <!-- Seção da Lista de URLs -->
+    <!-- Seção de URLs cadastradas -->
     <section class="section-bloco">
       <div class="secao-cabecalho">
         <h2>URLs cadastradas</h2>
@@ -91,7 +91,7 @@
               <th>Original</th>
               <th>Data</th>
               <th>Cliques</th>
-              <th>Link</th>
+              <th>Ação</th>
             </tr>
           </thead>
           <tbody id="tabela-corpo">
@@ -102,6 +102,7 @@
         </table>
       </div>
     </section>
+
 
   </div>
 
