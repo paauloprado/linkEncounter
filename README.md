@@ -43,17 +43,3 @@ Na página você pode encurtar links, testar as consultas e ver todos os registr
 - `server.js`: servidor web, rotas da API e redirecionamento.
 - `public/`: interface web simples (HTML, CSS e JavaScript).
 
----
-
-## Como subir para o GitHub
-
-Se ainda não enviou os arquivos para o repositório:
-
-```bash
-git init
-git add .
-git commit -m "Projeto encurtador de URLs"
-git branch -M main
-git remote add origin https://github.com/paauloprado/linkEncounter.git
-git push -u origin main
-```
